@@ -1,0 +1,475 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#050507" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="STREAK" />
+  <title>STREAK — 24/7 Challenge &amp; Study Timer</title>
+
+  <!-- Minimalist Inline SVG App Icon (Crimson Kinetic Ring on Carbon Black) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23050507'/%3E%3Ccircle cx='32' cy='32' r='21' fill='none' stroke='rgba(255,255,255,0.12)' stroke-width='2'/%3E%3Cpath d='M 32 11 A 21 21 0 0 1 53 32' fill='none' stroke='%23FF2438' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='53' cy='32' r='3.5' fill='%23FFFFFF'/%3E%3C/svg%3E" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Crisp Geometric + Tabular Mono + Clean Bengali Fallback Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS — OLED CARBON BLACK, VIVID CRIMSON & ELECTRIC EMERALD
+       ========================================================================= */
+    :root {
+      --bg: #050507;
+      --surface: #0F0F13;
+      --surface-elevated: #16161C;
+      --surface-recessed: #09090C;
+      --hairline: rgba(255, 255, 255, 0.08);
+      --hairline-strong: rgba(255, 255, 255, 0.14);
+
+      --text-primary: #FFFFFF;
+      --text-secondary: #71717A;
+      --text-muted: #52525B;
+
+      /* Active Kinetic Accent (Defaults to Vivid Crimson Red) */
+      --accent: #FF2438;
+      --accent-rgb: 255, 36, 56;
+      --accent-soft: rgba(255, 36, 56, 0.12);
+      --accent-border: rgba(255, 36, 56, 0.32);
+      --accent-glow: rgba(255, 36, 56, 0.36);
+
+      /* Positive Completion / Study Goal Accent */
+      --emerald: #00DC82;
+      --emerald-soft: rgba(0, 220, 130, 0.12);
+      --emerald-border: rgba(0, 220, 130, 0.30);
+
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Space Grotesk', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .font-mono-digital {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.03em;
+    }
+
+    /* Matte Carbon Card Surface */
+    .matte-card {
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+      transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .matte-card-interactive:hover {
+      border-color: var(--hairline-strong);
+      background: #131318;
+    }
+
+    /* Crisp Primary Action Pill */
+    .btn-primary {
+      background: var(--text-primary);
+      color: #050507;
+      box-shadow: 0 10px 30px -12px rgba(255, 255, 255, 0.28);
+      transition: transform 0.14s ease, opacity 0.2s ease, background-color 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.94;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.965);
+    }
+
+    /* Accent Kinetic Button */
+    .btn-accent {
+      background: var(--accent);
+      color: #FFFFFF;
+      box-shadow: 0 12px 30px -10px var(--accent-glow);
+      transition: transform 0.14s ease, filter 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-accent:hover {
+      filter: brightness(1.08);
+    }
+
+    .btn-accent:active {
+      transform: scale(0.965);
+    }
+
+    /* Minimal Outlined Crimson Reset Button */
+    .btn-danger-glass {
+      background: rgba(255, 36, 56, 0.07);
+      border: 1px solid rgba(255, 36, 56, 0.28);
+      color: #FF5566;
+      transition: transform 0.14s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .btn-danger-glass:hover {
+      background: rgba(255, 36, 56, 0.14);
+      border-color: rgba(255, 36, 56, 0.48);
+      color: #FF808C;
+    }
+
+    .btn-danger-glass:active {
+      transform: scale(0.965);
+    }
+
+    /* Neutral Matte Button */
+    .btn-matte {
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      color: var(--text-primary);
+      transition: transform 0.14s ease, background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn-matte:hover {
+      background: var(--surface-elevated);
+      border-color: var(--hairline-strong);
+    }
+
+    .btn-matte:active {
+      transform: scale(0.965);
+    }
+
+    /* Emerald Action Button */
+    .btn-emerald {
+      background: var(--emerald);
+      color: #03150E;
+      box-shadow: 0 10px 28px -10px rgba(0, 220, 130, 0.35);
+      transition: transform 0.14s ease, filter 0.2s ease;
+    }
+
+    .btn-emerald:hover {
+      filter: brightness(1.06);
+    }
+
+    .btn-emerald:active {
+      transform: scale(0.965);
+    }
+
+    /* Header Brand Dot */
+    .brand-dot {
+      background-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      transition: background-color 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    /* Floating Bottom Capsule Navigation */
+    .capsule-nav {
+      background: rgba(15, 15, 19, 0.84);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid var(--hairline-strong);
+      box-shadow: 0 22px 48px -12px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .capsule-slider {
+      background: #1D1D24;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Segmented Controls */
+    .seg-active {
+      background: #1C1C23;
+      color: #FFFFFF !important;
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Active Challenge / Subject Pill */
+    .pill-active {
+      background: #181820 !important;
+      border-color: rgba(255, 255, 255, 0.22) !important;
+      color: #FFFFFF !important;
+    }
+
+    /* Clean Inputs */
+    .clean-input {
+      background: var(--surface-recessed);
+      border: 1px solid var(--hairline-strong);
+      color: #FFFFFF;
+      font-family: 'Space Grotesk', 'Hind Siliguri', sans-serif;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .clean-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    /* Bottom Sheet Modals */
+    .sheet-backdrop {
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      animation: fadeOverlay 0.2s ease-out;
+    }
+
+    .sheet-panel {
+      background: #0D0D11;
+      border: 1px solid var(--hairline-strong);
+      box-shadow: 0 -24px 64px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      animation: sheetRise 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeOverlay {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes sheetRise {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Subtle Tab Reveal */
+    .tab-enter {
+      animation: tabFade 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes tabFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Toast Notification */
+    .toast-pill {
+      background: rgba(18, 18, 24, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--hairline-strong);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8);
+      animation: toastPop 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes toastPop {
+      from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Hide Horizontal Scrollbar */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Responsive Canvas Sizing */
+    .ring-stage {
+      position: relative;
+      width: min(86vw, 336px);
+      height: min(86vw, 336px);
+    }
+
+    .study-ring-stage {
+      position: relative;
+      width: min(80vw, 304px);
+      height: min(80vw, 304px);
+    }
+
+    canvas.kinetic-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body class="selection:bg-white/20 selection:text-white">
+
+  <!-- Floating Toast Host -->
+  <div id="toastHost" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[400px] flex flex-col items-center gap-2 pointer-events-none"></div>
+
+  <!-- =========================================================================
+       CENTERED FLAGSHIP MOBILE-FIRST APP SHELL
+       ========================================================================= -->
+  <div class="relative z-10 w-full max-w-[460px] mx-auto min-h-screen flex flex-col px-4 sm:px-5 pt-4 pb-28">
+
+    <!-- ULTRA-MINIMAL TOP HEADER -->
+    <header class="flex items-center justify-between h-12 mb-4">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2 h-2 rounded-full brand-dot"></span>
+        <span class="text-sm font-bold tracking-[0.22em] uppercase text-white">STREAK</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Quick Orbit Speed Pill -->
+        <button id="btnHeaderOrbit" type="button" title="Toggle Ring Orbit Speed"
+                class="h-9 px-2.5 rounded-xl btn-matte flex items-center gap-1.5 text-[11px] font-mono-digital font-semibold text-zinc-300 cursor-pointer">
+          <span class="w-1.5 h-1.5 rounded-full" style="background: var(--accent)"></span>
+          <span id="headerOrbitLabel">1S</span>
+        </button>
+
+        <!-- History Drawer Button -->
+        <button id="btnOpenHistory" type="button" aria-label="History & Milestones" title="History"
+                class="w-9 h-9 rounded-xl btn-matte flex items-center justify-center text-zinc-400 hover:text-white cursor-pointer">
+          <svg class="w-[17px] h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+            <path d="M12 7v5l3 2"/>
+          </svg>
+        </button>
+
+        <!-- Settings Drawer Button -->
+        <button id="btnOpenSettings" type="button" aria-label="Settings" title="Settings"
+                class="w-9 h-9 rounded-xl btn-matte flex items-center justify-center text-zinc-400 hover:text-white cursor-pointer">
+          <svg class="w-[17px] h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"/>
+            <line x1="4" y1="10" x2="4" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12" y2="3"/>
+            <line x1="20" y1="21" x2="20" y2="16"/>
+            <line x1="20" y1="12" x2="20" y2="3"/>
+            <line x1="1" y1="14" x2="7" y2="14"/>
+            <line x1="9" y1="8" x2="15" y2="8"/>
+            <line x1="17" y1="16" x2="23" y2="16"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- =======================================================================
+         TAB 1: CHALLENGE (24/7 CONTINUOUS STREAK TRACKER)
+         ======================================================================= -->
+    <main id="viewChallenge" class="tab-enter flex-1 flex flex-col">
+
+      <!-- Horizontal Challenge Switcher Rail -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 mb-2">
+        <div id="challengePills" class="flex items-center gap-2 shrink-0"></div>
+        <button id="btnNewChallenge" type="button"
+                class="shrink-0 h-9 px-3.5 rounded-full border border-dashed text-xs font-semibold text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors cursor-pointer"
+                style="border-color: var(--hairline-strong); background: rgba(255,255,255,0.02);">
+          + New
+        </button>
+      </div>
+
+      <!-- Active Challenge Title & Subtle Edit Trigger -->
+      <div class="flex items-center justify-center gap-1.5 mt-2 mb-1">
+        <h1 id="activeChallengeTitle" class="text-sm font-medium tracking-wide text-zinc-300 truncate max-w-[260px]">No Excuses</h1>
+        <button id="btnEditChallenge" type="button" aria-label="Edit Challenge" title="Edit / Delete"
+                class="w-6 h-6 rounded-lg flex items-center justify-center text-zinc-500 hover:text-white transition-colors cursor-pointer">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- HERO DIGITAL CLOCK + ROTATING KINETIC CYCLE RING (100% DIGITAL) -->
+      <section class="flex-1 flex flex-col items-center justify-center my-2">
+        <div id="challengeRingContainer" class="ring-stage flex items-center justify-center">
+          <!-- High-DPI Canvas Kinetic Ring -->
+          <canvas id="challengeCanvas" class="kinetic-canvas" aria-label="Kinetic Streak Cycle Ring"></canvas>
+
+          <!-- Centered Pure Digital Typography Readout -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-6">
+            <!-- Top Micro-Label: Day Counter -->
+            <div class="flex items-center gap-1.5 mb-2">
+              <span id="ringActiveIndicator" class="w-1.5 h-1.5 rounded-full opacity-40 transition-all" style="background: var(--text-secondary)"></span>
+              <span id="digitalDayLabel" class="text-xs font-semibold tracking-[0.22em] uppercase text-zinc-400">DAY 0</span>
+            </div>
+
+            <!-- Giant Crisp Digital Clock HH:MM:SS -->
+            <div class="font-mono-digital text-[40px] sm:text-[44px] font-semibold leading-none text-white flex items-baseline justify-center select-none">
+              <span id="clockHH">00</span>
+              <span class="text-zinc-500 mx-[1px] font-normal">:</span>
+              <span id="clockMM">00</span>
+              <span class="text-zinc-500 mx-[1px] font-normal">:</span>
+              <span id="clockSS">00</span>
+            </div>
+
+            <!-- Interactive Sub-Pill: Toggles 24H CYCLE % / TOTAL HRS -->
+            <button id="btnToggleSubMetric" type="button"
+                    class="pointer-events-auto mt-3.5 px-3 py-1 rounded-full text-[11px] font-mono-digital font-medium tracking-wider text-zinc-400 hover:text-white border transition-colors active:scale-95 cursor-pointer"
+                    style="background: rgba(15, 15, 19, 0.78); border-color: var(--hairline);">
+              <span id="ringSubMetricText">24H CYCLE · 0.0%</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLEAN 3-COLUMN MINIMAL STAT ROW -->
+      <section class="grid grid-cols-3 gap-2.5 mt-2 mb-4">
+        <div class="matte-card rounded-2xl p-3.5 flex flex-col justify-between">
+          <span class="text-[10px] font-semibold tracking-[0.14em] uppercase text-zinc-500">BEST STREAK</span>
+          <div id="statBestStreak" class="font-mono-digital text-base sm:text-lg font-semibold text-white mt-1.5">0d</div>
+        </div>
+
+        <div class="matte-card rounded-2xl p-3.5 flex flex-col justify-between">
+          <span class="text-[10px] font-semibold tracking-[0.14em] uppercase text-zinc-500">TOTAL HOURS</span>
+          <div id="statTotalHours" class="font-mono-digital text-base sm:text-lg font-semibold text-white mt-1.5">0.0h</div>
+        </div>
+
+        <div class="matte-card rounded-2xl p-3.5 flex flex-col justify-between">
+          <span class="text-[10px] font-semibold tracking-[0.14em] uppercase text-zinc-500">ATTEMPTS</span>
+          <div id="statAttempts" class="font-mono-digital text-base sm:text-lg font-semibold text-white mt-1.5">0</div>
+        </div>
+      </section>
+
+      <!-- CLEAN ACTION BAR -->
+      <section class="mb-2">
+        <!-- Idle State -->
+        <div id="challengeIdleActions">
+          <button id="btnStartChallenge" type="button"
+                  class="btn-primary w-full h-14 rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            <span>Start Challenge</span>
+          </button>
+        </div>
+
+        <!-- Active State -->
+        <div id="challengeActiveActions" class="hidden flex items-center gap-2.5">
+          <button id="btnFailReset" type="button"
+                  class="btn-danger-glass flex-1 h-13 py-3.5 px-5 rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <span>I Failed — Reset</span>
+          </button>
+
+          <button id="btnActiveHistoryIcon" type="button" aria-label="View History & Milestones" title="History & Milestones"
+                  class="btn-matte w-13 h-13 p-3.5 rounded-full flex items-center justify-center text-zinc-300 hover:text-white shrink-0 cursor-pointer">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="5"/>
+              <path d="M20 21a8 8 0 0 0-16 0"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- =======================================================================
+         TAB 2: STUDY TIMER & ANALYTICS
+         ======================================================================= -->
+    <main id="viewStudy" class="hidden tab-enter flex-1 flex flex-col gap-4">
+
+      <!-- Clean Segmented Mode Pill -->
+      <div class="w-full p-1 rounded-2xl grid grid-cols-3 gap-1"
+           style="background: var(--surface); border: 1px solid var(--hairline);">
+        <button type="button" data-study-mode="stopwatch" class="study-mode-btn py-2 rounded-xl text-xs font-semibold text-zinc-400 transition-all cursor-pointer">Stopwatch</button>
+        <button type="button" data-study-mode="25m" class="study-mode-btn py-2 rounded-xl text-xs font-semibold text-zinc-400 transition-all cursor-pointer">25m</button>
+        <button type="button" data-study-mode="50m" class="study-mode-btn py-2 rounded-xl text-xs font-semibold text-zinc-400 transition-all cursor-pointer">50m</button>
+      </div>
+
+      <!-- HERO DIGITAL STUDY CLOCK + ROTATING KINETIC RING -->
+      <sectio
